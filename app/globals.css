@@ -1,0 +1,475 @@
+@import "tailwindcss";
+
+/* ================================================================
+   EML Academic Design System — Dark Academic Theme
+   ================================================================ */
+
+:root {
+  /* ---- Color Palette ---- */
+  --bg-primary: #0a0b0f;
+  --bg-secondary: #111218;
+  --bg-tertiary: #181a24;
+  --bg-card: #151720;
+  --bg-card-hover: #1c1e2e;
+  --bg-glass: rgba(21, 23, 32, 0.72);
+
+  --text-primary: #e8e6f0;
+  --text-secondary: #9b97b0;
+  --text-tertiary: #6c6888;
+  --text-dim: #4a4660;
+
+  --accent-primary: #6c63ff;
+  --accent-secondary: #a78bfa;
+  --accent-tertiary: #c4b5fd;
+  --accent-glow: rgba(108, 99, 255, 0.25);
+  --accent-glow-strong: rgba(108, 99, 255, 0.45);
+
+  --accent-warm: #f59e0b;
+  --accent-warm-glow: rgba(245, 158, 11, 0.2);
+
+  --accent-cyan: #22d3ee;
+  --accent-cyan-glow: rgba(34, 211, 238, 0.15);
+
+  --accent-rose: #f472b6;
+  --accent-green: #34d399;
+
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.1);
+  --border-accent: rgba(108, 99, 255, 0.3);
+
+  /* ---- Typography ---- */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  /* ---- Spacing ---- */
+  --section-padding: clamp(4rem, 10vh, 8rem);
+  --content-max-width: 72rem;
+  --content-narrow: 48rem;
+
+  /* ---- Transitions ---- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-fast: 150ms var(--ease-out-expo);
+  --transition-normal: 300ms var(--ease-out-expo);
+  --transition-slow: 600ms var(--ease-out-expo);
+}
+
+/* ================================================================
+   Base
+   ================================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--accent-primary);
+  color: white;
+}
+
+/* ================================================================
+   Typography
+   ================================================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+h1 {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 800;
+}
+
+h2 {
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+  font-weight: 700;
+}
+
+h3 {
+  font-size: clamp(1.3rem, 2vw, 1.75rem);
+  font-weight: 600;
+}
+
+p {
+  font-family: var(--font-serif);
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
+  line-height: 1.75;
+  color: var(--text-secondary);
+  max-width: 65ch;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* ================================================================
+   Section Layout
+   ================================================================ */
+
+.section {
+  position: relative;
+  padding: var(--section-padding) 1.5rem;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+.section-narrow {
+  max-width: var(--content-narrow);
+}
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.section-label::before {
+  content: "";
+  display: block;
+  width: 1.5rem;
+  height: 1px;
+  background: var(--accent-primary);
+}
+
+/* ================================================================
+   Cards
+   ================================================================ */
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
+  padding: 2rem;
+  transition: all var(--transition-normal);
+}
+
+.card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-accent);
+  box-shadow: 0 0 40px var(--accent-glow);
+}
+
+.glass-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
+  padding: 2rem;
+}
+
+/* ================================================================
+   Formula Card
+   ================================================================ */
+
+.formula-card {
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(108, 99, 255, 0.05) 100%);
+  border: 1px solid var(--border-accent);
+  border-radius: 1rem;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.formula-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, var(--accent-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.formula-card .katex {
+  font-size: 1.6em;
+}
+
+/* ================================================================
+   KaTeX Overrides
+   ================================================================ */
+
+.katex {
+  color: var(--text-primary) !important;
+  font-size: 1.1em;
+}
+
+.katex .mathnormal {
+  color: var(--accent-tertiary) !important;
+}
+
+/* Protect KaTeX internals from Tailwind v4 preflight resets */
+.katex,
+.katex-display,
+.katex .katex-html {
+  white-space: nowrap !important;
+}
+
+.katex .katex-html > .base {
+  display: inline !important;
+}
+
+.katex .katex-html > .mord,
+.katex .katex-html > .mrel,
+.katex .katex-html > .mbin,
+.katex .katex-html > .mopen,
+.katex .katex-html > .mclose,
+.katex .katex-html > .mpunct,
+.katex .katex-html > .minner,
+.katex .katex-html > .mop,
+.katex .katex-html .base,
+.katex .katex-html .strut {
+  display: inline !important;
+}
+
+.katex .katex-html .newline {
+  display: block !important;
+  height: 0 !important;
+}
+
+.katex-display {
+  display: block !important;
+  text-align: center;
+  margin: 0.5em 0;
+}
+
+.katex-display > .katex {
+  display: inline-block !important;
+  text-align: initial;
+}
+
+.katex .katex-html {
+  display: inline !important;
+}
+
+.katex img,
+.katex svg {
+  display: inline !important;
+}
+
+/* ================================================================
+   Buttons
+   ================================================================ */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: var(--accent-primary);
+  color: white;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  letter-spacing: 0.01em;
+}
+
+.btn-primary:hover {
+  background: #5b52e0;
+  box-shadow: 0 0 30px var(--accent-glow-strong);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: 1px solid var(--border-medium);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-ghost:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-secondary);
+}
+
+/* ================================================================
+   Dividers
+   ================================================================ */
+
+.section-divider {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--border-medium) 20%,
+    var(--accent-primary) 50%,
+    var(--border-medium) 80%,
+    transparent 100%
+  );
+  opacity: 0.5;
+}
+
+/* ================================================================
+   Glow Effects
+   ================================================================ */
+
+.glow-text {
+  text-shadow: 0 0 40px var(--accent-glow-strong);
+}
+
+.glow-box {
+  box-shadow: 0 0 60px var(--accent-glow), 0 0 120px rgba(108, 99, 255, 0.1);
+}
+
+/* ================================================================
+   Scrollbar
+   ================================================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+/* ================================================================
+   D3 Tree Overrides
+   ================================================================ */
+
+.tree-container svg {
+  overflow: visible;
+}
+
+.tree-node circle {
+  transition: all var(--transition-fast);
+}
+
+.tree-node text {
+  font-family: var(--font-mono);
+  fill: var(--text-primary);
+  font-size: 12px;
+}
+
+.tree-link {
+  fill: none;
+  stroke: var(--border-medium);
+  stroke-width: 1.5;
+  transition: stroke var(--transition-fast);
+}
+
+/* ================================================================
+   Animations
+   ================================================================ */
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ================================================================
+   Input
+   ================================================================ */
+
+.input-field {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.input-field:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.input-field::placeholder {
+  color: var(--text-dim);
+}
+
+/* ================================================================
+   Responsive
+   ================================================================ */
+
+@media (max-width: 768px) {
+  .section {
+    padding: 3rem 1rem;
+  }
+
+  .formula-card .katex {
+    font-size: 1.2em;
+  }
+}
