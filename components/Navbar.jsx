@@ -6,11 +6,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const navLinks = [
-  { href: '/#why-it-matters', label: 'Why' },
-  { href: '/#core-operator', label: 'Operator' },
-  { href: '/#grammar', label: 'Grammar' },
-  { href: '/#pipeline', label: 'Pipeline' },
-  { href: '/lab', label: 'Lab', highlight: true },
+  { href: '/#gallery', label: '展馆' },
+  { href: '/#taylor', label: '泰勒' },
+  { href: '/#newton', label: '迭代' },
+  { href: '/#squeeze', label: '夹逼' },
+  { href: '/#eml', label: 'EML' },
+  { href: '/lab', label: '实验室', highlight: true },
 ];
 
 export default function Navbar() {
@@ -66,9 +67,9 @@ export default function Navbar() {
             fontWeight: 700,
             fontSize: '1rem',
             color: 'var(--accent-secondary)',
-            letterSpacing: '-0.02em',
+            letterSpacing: 0,
           }}>
-            eml
+            Math Atlas
           </span>
           <span style={{
             fontFamily: 'var(--font-mono)',
@@ -76,7 +77,7 @@ export default function Navbar() {
             color: 'var(--text-dim)',
             letterSpacing: '0.05em',
           }}>
-            (x, y)
+            visual
           </span>
         </Link>
 

@@ -22,23 +22,24 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "EML — Universal Function Generator via a Single Binary Operator",
+  title: "数学定理可视化汇总馆",
   description:
-    "Discover how all elementary functions — exponential, logarithmic, trigonometric, and algebraic — can be generated from a single binary operator: eml(x, y) = exp(x) - ln(y).",
+    "用可视化、逻辑步骤和新手友好的例子理解泰勒公式、平方根迭代、夹逼定理与 EML 单一算子。",
   keywords: [
+    "数学可视化",
+    "泰勒公式",
     "EML",
-    "elementary functions",
-    "functional completeness",
-    "symbolic regression",
-    "binary operator",
-    "mathematical visualization",
+    "平方根",
+    "夹逼定理",
+    "牛顿迭代",
+    "数学教育",
   ],
 };
 
 export default function RootLayout({ children }) {
   return (
     <html
-      lang="en"
+      lang="zh-CN"
       className={`${inter.variable} ${sourceSerif.variable} ${jetbrainsMono.variable}`}
     >
       <body style={{ margin: 0 }}>

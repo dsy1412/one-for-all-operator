@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { motion, useInView } from 'motion/react';
 import Formula from '../Formula';
 import D3Tree from '../D3Tree';
@@ -20,9 +20,8 @@ export default function PipelineSection() {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
   const [selectedExpr, setSelectedExpr] = useState('exp(x)');
   const [activeStep, setActiveStep] = useState(0); // 0: Expression, 1: AST, 2: EML
-  const [parsed, setParsed] = useState(null);
 
-  useEffect(() => {
+  const parsed = useMemo(() => {
     try {
       resetIdCounter();
       const ast = parseExpression(selectedExpr);
@@ -35,9 +34,9 @@ export default function PipelineSection() {
       const latexEml = astToLatex(eml);
       const d3Eml = treeToD3Hierarchy(eml);
 
-      setParsed({ ast, eml, latexOrig, latexEml, d3Ast, d3Eml });
+      return { ast, eml, latexOrig, latexEml, d3Ast, d3Eml };
     } catch (e) {
-      setParsed(null);
+      return null;
     }
   }, [selectedExpr]);
 

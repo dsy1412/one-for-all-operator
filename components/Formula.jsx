@@ -1,30 +1,39 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useMemo } from 'react';
 import katex from 'katex';
 
-export default function Formula({ tex, displayMode = true, className = '' }) {
-  const ref = useRef(null);
+const renderOptions = {
+  throwOnError: false,
+  strict: false,
+  trust: true,
+  macros: {
+    '\\eml': '\\text{eml}',
+  },
+};
 
-  useEffect(() => {
-    if (ref.current && tex) {
-      try {
-        katex.render(tex, ref.current, {
-          displayMode,
-          throwOnError: false,
-          strict: false,
-          trust: true,
-          macros: {
-            '\\eml': '\\text{eml}',
-          },
-        });
-      } catch (e) {
-        if (ref.current) {
-          ref.current.textContent = tex;
-        }
-      }
+export default function Formula({ tex, displayMode = true, className = '' }) {
+  const html = useMemo(() => {
+    if (!tex) return '';
+
+    try {
+      return katex.renderToString(tex, {
+        ...renderOptions,
+        displayMode,
+      });
+    } catch {
+      return '';
     }
   }, [tex, displayMode]);
 
-  return <span ref={ref} className={`formula-inline ${className}`} />;
+  if (!html) {
+    return <span className={`formula-inline ${className}`}>{tex}</span>;
+  }
+
+  return (
+    <span
+      className={`formula-inline ${className}`}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
 }
