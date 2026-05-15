@@ -1691,3 +1691,344 @@ p {
     display: grid;
   }
 }
+
+/* ================================================================
+   Concept Labs
+   ================================================================ */
+
+.concept-labs-page {
+  min-height: 100vh;
+  padding: 6.5rem 1.5rem 4rem;
+}
+
+.concept-labs-hero,
+.concept-lab-tabs,
+.concept-lab-shell {
+  max-width: 78rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.concept-labs-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(280px, 0.55fr);
+  align-items: end;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.concept-labs-hero h1 {
+  margin: 0;
+  font-size: 4.2rem;
+  line-height: 1.02;
+}
+
+.concept-labs-hero p:not(.atlas-kicker) {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.concept-lab-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.concept-lab-tabs button {
+  min-height: 88px;
+  display: grid;
+  align-content: center;
+  gap: 0.35rem;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.concept-lab-tabs button.active,
+.concept-lab-tabs button:hover {
+  border-color: rgba(34,211,238,0.45);
+  background: rgba(34,211,238,0.08);
+}
+
+.concept-lab-tabs span {
+  color: var(--accent-warm);
+  font: 800 0.72rem var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.concept-lab-tabs strong {
+  color: var(--text-primary);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.concept-lab-panel {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.52fr) minmax(420px, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.concept-lab-controls,
+.concept-lab-stage {
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  padding: 1.25rem;
+}
+
+.concept-lab-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.concept-lab-controls h2 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.concept-lab-controls p {
+  margin: 0;
+  font-size: 0.96rem;
+  line-height: 1.7;
+}
+
+.concept-lab-controls label {
+  display: grid;
+  gap: 0.55rem;
+  color: var(--text-secondary);
+  font: 800 0.78rem var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.concept-lab-controls input,
+.concept-lab-controls select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font: 800 0.95rem var(--font-mono);
+}
+
+.concept-lab-controls input[type="range"] {
+  min-height: auto;
+  padding: 0;
+  accent-color: var(--accent-cyan);
+}
+
+.concept-lab-formula {
+  padding: 1rem;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.22);
+  overflow-x: auto;
+}
+
+.concept-lab-note {
+  padding: 0.85rem 1rem;
+  border-left: 3px solid rgba(245,158,11,0.55);
+  background: rgba(245,158,11,0.08);
+}
+
+.concept-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.concept-button-row button {
+  min-height: 36px;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 7px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font: 800 0.78rem var(--font-mono);
+  cursor: pointer;
+}
+
+.concept-button-row button:hover {
+  border-color: rgba(34,211,238,0.45);
+  color: var(--accent-cyan);
+}
+
+.concept-lab-stage {
+  display: grid;
+  gap: 1rem;
+}
+
+.concept-lab-readout {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.concept-lab-readout.stacked {
+  grid-template-columns: 1fr;
+}
+
+.concept-lab-readout div {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-card);
+}
+
+.concept-lab-readout span {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--text-tertiary);
+  font: 800 0.7rem var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.concept-lab-readout strong {
+  color: var(--accent-cyan);
+  font: 900 1.15rem var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.concept-lab-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  background:
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+.lab-guide-line {
+  stroke: rgba(34,211,238,0.45);
+  stroke-width: 1.5;
+  stroke-dasharray: 7 7;
+}
+
+.lab-error-line {
+  stroke: var(--accent-rose);
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+}
+
+.lab-probe.exact {
+  fill: var(--accent-green);
+}
+
+.lab-probe.approx {
+  fill: var(--accent-warm);
+}
+
+.concept-root-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(190px, 0.6fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.concept-root-shape {
+  position: relative;
+  min-height: 310px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background:
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.concept-iteration-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.concept-iteration-list div {
+  padding: 0.85rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-card);
+}
+
+.concept-iteration-list span {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--accent-warm);
+  font: 800 0.72rem var(--font-mono);
+}
+
+.concept-iteration-list strong {
+  color: var(--text-primary);
+  font: 800 0.86rem/1.5 var(--font-mono);
+}
+
+.concept-iteration-list p {
+  margin: 0.35rem 0 0;
+  font: 700 0.78rem/1.45 var(--font-mono);
+}
+
+.concept-eml-preview svg {
+  width: 100%;
+  height: auto;
+}
+
+.concept-eml-preview line {
+  stroke: rgba(255,255,255,0.16);
+  stroke-width: 2;
+}
+
+.concept-eml-preview circle {
+  fill: rgba(34,211,238,0.1);
+  stroke: rgba(34,211,238,0.7);
+  stroke-width: 2;
+}
+
+.concept-eml-preview text {
+  fill: var(--text-primary);
+  font: 900 1rem var(--font-mono);
+}
+
+@media (max-width: 1060px) {
+  .concept-labs-hero,
+  .concept-lab-panel,
+  .concept-root-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .concept-lab-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .concept-iteration-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .concept-labs-page {
+    padding: 5.5rem 1rem 3rem;
+  }
+
+  .concept-labs-hero h1 {
+    font-size: 2.7rem;
+  }
+
+  .concept-lab-tabs,
+  .concept-lab-readout,
+  .concept-iteration-list {
+    grid-template-columns: 1fr;
+  }
+}

@@ -11,7 +11,7 @@ const navLinks = [
   { href: '/#newton', label: '迭代' },
   { href: '/#squeeze', label: '夹逼' },
   { href: '/#eml', label: 'EML' },
-  { href: '/lab', label: '实验室', highlight: true },
+  { href: '/labs', label: '实验室', highlight: true },
 ];
 
 export default function Navbar() {

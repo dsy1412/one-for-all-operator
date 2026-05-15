@@ -15,8 +15,8 @@ export default function Home() {
             能试探、能被新手顺着逻辑读懂的数学展馆。
           </p>
         </div>
-        <Link href="/lab" className="atlas-footer-link">
-          进入 EML 表达式实验室
+        <Link href="/labs" className="atlas-footer-link">
+          进入数学公式实验室
         </Link>
       </footer>
     </main>

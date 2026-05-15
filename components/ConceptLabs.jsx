@@ -1,0 +1,406 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import Link from 'next/link';
+import Formula from '@/components/Formula';
+
+const labs = [
+  { id: 'taylor', label: '泰勒', title: '泰勒公式实验室' },
+  { id: 'newton', label: '平方根', title: '平方根迭代实验室' },
+  { id: 'squeeze', label: '夹逼', title: '夹逼定理实验室' },
+  { id: 'eml', label: 'EML', title: 'EML 树实验室' },
+];
+
+const functionModels = {
+  exp: {
+    name: 'e^x',
+    tex: 'e^x',
+    exact: (x) => Math.exp(x),
+    derivative: (order, a) => Math.exp(a),
+    minX: -2.5,
+    maxX: 2.5,
+    minY: -2,
+    maxY: 9,
+    note: '指数函数最适合入门：每一阶导数仍然是 e^x，所以每多一项都在补同一种增长。',
+  },
+  sin: {
+    name: 'sin x',
+    tex: '\\sin x',
+    exact: (x) => Math.sin(x),
+    derivative: (order, a) => {
+      const cycle = [Math.sin, Math.cos, (value) => -Math.sin(value), (value) => -Math.cos(value)];
+      return cycle[order % 4](a);
+    },
+    minX: -Math.PI * 1.4,
+    maxX: Math.PI * 1.4,
+    minY: -2,
+    maxY: 2,
+    note: 'sin 的展开会交替出现奇数次幂。你可以移动展开中心，看局部近似怎样跟着平移。',
+  },
+  cos: {
+    name: 'cos x',
+    tex: '\\cos x',
+    exact: (x) => Math.cos(x),
+    derivative: (order, a) => {
+      const cycle = [Math.cos, (value) => -Math.sin(value), (value) => -Math.cos(value), Math.sin];
+      return cycle[order % 4](a);
+    },
+    minX: -Math.PI * 1.4,
+    maxX: Math.PI * 1.4,
+    minY: -2,
+    maxY: 2,
+    note: 'cos 在 0 附近的偶函数结构很明显：0、2、4、6 阶会越来越像原曲线。',
+  },
+  rational: {
+    name: '1/(1-x)',
+    tex: '\\frac{1}{1-x}',
+    exact: (x) => 1 / (1 - x),
+    derivative: (order, a) => factorial(order) / ((1 - a) ** (order + 1)),
+    minX: -2,
+    maxX: 0.86,
+    minY: -1,
+    maxY: 8,
+    note: '这个例子提醒你：泰勒多项式有有效半径。靠近 x=1 的竖直渐近线时，低阶近似会迅速失控。',
+  },
+};
+
+function factorial(n) {
+  let result = 1;
+  for (let i = 2; i <= n; i += 1) result *= i;
+  return result;
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function taylorValue(model, x, center, degree) {
+  let total = 0;
+  for (let k = 0; k <= degree; k += 1) {
+    total += (model.derivative(k, center) / factorial(k)) * ((x - center) ** k);
+  }
+  return total;
+}
+
+function makePath(fn, bounds) {
+  const width = 680;
+  const height = 380;
+  const padding = 38;
+  const steps = 180;
+  const { minX, maxX, minY, maxY } = bounds;
+  const toX = (x) => padding + ((x - minX) / (maxX - minX)) * (width - padding * 2);
+  const toY = (y) => height - padding - ((y - minY) / (maxY - minY)) * (height - padding * 2);
+  const path = Array.from({ length: steps + 1 }, (_, index) => {
+    const x = minX + (index / steps) * (maxX - minX);
+    const y = clamp(fn(x), minY, maxY);
+    return `${index === 0 ? 'M' : 'L'} ${toX(x).toFixed(2)} ${toY(y).toFixed(2)}`;
+  }).join(' ');
+
+  return { width, height, path, toX, toY, axisX: toY(0), axisY: toX(0) };
+}
+
+function buildTaylorFormula(model, center, degree) {
+  if (Math.abs(center) < 0.001) {
+    if (model.name === 'e^x') return `e^x\\approx \\sum_{k=0}^{${degree}}\\frac{x^k}{k!}`;
+    if (model.name === 'sin x') return `\\sin x\\approx \\sum_{k=0}^{${Math.floor((degree - 1) / 2)}}(-1)^k\\frac{x^{2k+1}}{(2k+1)!}`;
+    if (model.name === 'cos x') return `\\cos x\\approx \\sum_{k=0}^{${Math.floor(degree / 2)}}(-1)^k\\frac{x^{2k}}{(2k)!}`;
+  }
+
+  return `${model.tex}\\approx \\sum_{k=0}^{${degree}}\\frac{f^{(k)}(${center.toFixed(1)})}{k!}(x-${center.toFixed(1)})^k`;
+}
+
+function TaylorLab() {
+  const [modelKey, setModelKey] = useState('exp');
+  const [degree, setDegree] = useState(3);
+  const [center, setCenter] = useState(0);
+  const [probe, setProbe] = useState(1);
+  const model = functionModels[modelKey];
+
+  const bounds = useMemo(() => ({
+    minX: model.minX,
+    maxX: model.maxX,
+    minY: model.minY,
+    maxY: model.maxY,
+  }), [model]);
+
+  const exact = model.exact(probe);
+  const approx = taylorValue(model, probe, center, degree);
+  const error = Math.abs(exact - approx);
+  const chart = useMemo(() => {
+    const exactPath = makePath((x) => model.exact(x), bounds);
+    const approxPath = makePath((x) => taylorValue(model, x, center, degree), bounds);
+    return { ...exactPath, exactPath: exactPath.path, approxPath: approxPath.path };
+  }, [model, bounds, center, degree]);
+
+  const centerX = chart.toX(center);
+  const centerY = chart.toY(clamp(model.exact(center), bounds.minY, bounds.maxY));
+  const probeX = chart.toX(probe);
+  const probeExactY = chart.toY(clamp(exact, bounds.minY, bounds.maxY));
+  const probeApproxY = chart.toY(clamp(approx, bounds.minY, bounds.maxY));
+
+  return (
+    <div className="concept-lab-panel">
+      <aside className="concept-lab-controls">
+        <p className="atlas-kicker">Taylor controls</p>
+        <h2>改变函数、阶数和展开中心</h2>
+        <p>观察橙色多项式怎样在展开中心附近贴住真实曲线，离得越远误差怎样变大。</p>
+
+        <label>
+          函数
+          <select value={modelKey} onChange={(event) => setModelKey(event.target.value)}>
+            {Object.entries(functionModels).map(([key, item]) => (
+              <option key={key} value={key}>{item.name}</option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          展开阶数：{degree}
+          <input type="range" min="0" max="8" value={degree} onChange={(event) => setDegree(Number(event.target.value))} />
+        </label>
+
+        <label>
+          展开中心 a：{center.toFixed(1)}
+          <input type="range" min="-1.5" max="1.5" step="0.1" value={center} onChange={(event) => setCenter(Number(event.target.value))} />
+        </label>
+
+        <label>
+          测试点 x：{probe.toFixed(1)}
+          <input type="range" min={bounds.minX} max={bounds.maxX} step="0.1" value={probe} onChange={(event) => setProbe(Number(event.target.value))} />
+        </label>
+
+        <div className="concept-lab-formula">
+          <Formula tex={buildTaylorFormula(model, center, degree)} displayMode={true} />
+        </div>
+        <p className="concept-lab-note">{model.note}</p>
+      </aside>
+
+      <section className="concept-lab-stage">
+        <div className="concept-lab-readout">
+          <div><span>真实值</span><strong>{exact.toFixed(6)}</strong></div>
+          <div><span>近似值</span><strong>{approx.toFixed(6)}</strong></div>
+          <div><span>误差</span><strong>{error.toExponential(2)}</strong></div>
+        </div>
+        <svg className="concept-lab-chart" viewBox={`0 0 ${chart.width} ${chart.height}`} role="img" aria-label="泰勒公式实验曲线">
+          <line x1="38" y1={chart.axisX} x2="642" y2={chart.axisX} className="axis-line" />
+          <line x1={chart.axisY} y1="38" x2={chart.axisY} y2="342" className="axis-line" />
+          <path d={chart.exactPath} className="exact-path" />
+          <path d={chart.approxPath} className="approx-path" />
+          <line x1={centerX} y1="38" x2={centerX} y2="342" className="lab-guide-line" />
+          <line x1={probeX} y1={probeExactY} x2={probeX} y2={probeApproxY} className="lab-error-line" />
+          <circle cx={centerX} cy={centerY} r="6" className="anchor-dot" />
+          <circle cx={probeX} cy={probeExactY} r="5" className="lab-probe exact" />
+          <circle cx={probeX} cy={probeApproxY} r="5" className="lab-probe approx" />
+          <text x="470" y="72" className="curve-label exact">真实函数</text>
+          <text x="450" y="318" className="curve-label approx">泰勒多项式</text>
+        </svg>
+      </section>
+    </div>
+  );
+}
+
+function buildRootSteps(number, iterations) {
+  const steps = [];
+  let guess = Math.max(1, Math.floor(Math.sqrt(number)));
+  for (let index = 0; index <= iterations; index += 1) {
+    const partner = number / guess;
+    const next = (guess + partner) / 2;
+    steps.push({ index, guess, partner, next, error: Math.abs(next * next - number) });
+    guess = next;
+  }
+  return steps;
+}
+
+function NewtonLab() {
+  const [number, setNumber] = useState(51);
+  const [iterations, setIterations] = useState(3);
+  const safeNumber = clamp(number || 51, 2, 999);
+  const steps = buildRootSteps(safeNumber, iterations);
+  const current = steps[steps.length - 1];
+  const root = Math.sqrt(safeNumber);
+  const scale = 210 / Math.max(root, current.guess, current.partner);
+  const width = current.guess * scale;
+  const height = current.partner * scale;
+  const square = root * scale;
+
+  return (
+    <div className="concept-lab-panel">
+      <aside className="concept-lab-controls">
+        <p className="atlas-kicker">Newton controls</p>
+        <h2>用面积反复修正平方根</h2>
+        <p>把 N 看成长方形面积。你猜一条边，另一条边就是 N 除以它；两边取平均后，形状更接近正方形。</p>
+        <label>
+          面积 N
+          <input type="number" min="2" max="999" value={number} onChange={(event) => setNumber(Number(event.target.value))} />
+        </label>
+        <div className="concept-button-row">
+          {[49, 51, 97, 222].map((value) => (
+            <button key={value} type="button" onClick={() => setNumber(value)}>N={value}</button>
+          ))}
+        </div>
+        <label>
+          迭代次数：{iterations}
+          <input type="range" min="0" max="6" value={iterations} onChange={(event) => setIterations(Number(event.target.value))} />
+        </label>
+        <div className="concept-lab-formula">
+          <Formula tex={`x_{n+1}=\\frac{1}{2}\\left(x_n+\\frac{${safeNumber.toFixed(0)}}{x_n}\\right)`} displayMode={true} />
+        </div>
+      </aside>
+
+      <section className="concept-lab-stage">
+        <div className="concept-root-grid">
+          <div className="concept-root-shape">
+            <div className="target-square" style={{ width: `${square}px`, height: `${square}px` }} />
+            <div className="current-rectangle" style={{ width: `${width}px`, height: `${height}px` }} />
+          </div>
+          <div className="concept-lab-readout stacked">
+            <div><span>当前估计</span><strong>{current.next.toFixed(8)}</strong></div>
+            <div><span>真实平方根</span><strong>{root.toFixed(8)}</strong></div>
+            <div><span>平方误差</span><strong>{current.error.toExponential(2)}</strong></div>
+          </div>
+        </div>
+        <div className="concept-iteration-list">
+          {steps.map((step) => (
+            <div key={step.index}>
+              <span>第 {step.index} 轮</span>
+              <strong>{step.guess.toFixed(6)} 和 {step.partner.toFixed(6)}</strong>
+              <p>平均后得到 {step.next.toFixed(8)}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function SqueezeLab() {
+  const [frequency, setFrequency] = useState(1);
+  const [power, setPower] = useState(1);
+  const [windowSize, setWindowSize] = useState(2);
+  const bounds = useMemo(() => ({
+    minX: -windowSize,
+    maxX: windowSize,
+    minY: -2.2,
+    maxY: 2.2,
+  }), [windowSize]);
+  const chart = useMemo(() => {
+    const upper = makePath((x) => Math.abs(x) ** power, bounds);
+    const lower = makePath((x) => -(Math.abs(x) ** power), bounds);
+    const middle = makePath((x) => (x === 0 ? 0 : (Math.abs(x) ** power) * Math.sin(frequency / x)), bounds);
+    return { ...upper, upper: upper.path, lower: lower.path, middle: middle.path };
+  }, [frequency, power, bounds]);
+
+  return (
+    <div className="concept-lab-panel">
+      <aside className="concept-lab-controls">
+        <p className="atlas-kicker">Squeeze controls</p>
+        <h2>把振荡函数关进边界里</h2>
+        <p>蓝色曲线可以疯狂振荡，但只要绿色和橙色边界同时收向 0，它就被迫一起收向 0。</p>
+        <label>
+          振荡频率：{frequency.toFixed(1)}
+          <input type="range" min="0.5" max="5" step="0.1" value={frequency} onChange={(event) => setFrequency(Number(event.target.value))} />
+        </label>
+        <label>
+          边界幂次：{power.toFixed(1)}
+          <input type="range" min="0.5" max="2" step="0.1" value={power} onChange={(event) => setPower(Number(event.target.value))} />
+        </label>
+        <label>
+          观察窗口：±{windowSize.toFixed(1)}
+          <input type="range" min="0.5" max="3" step="0.1" value={windowSize} onChange={(event) => setWindowSize(Number(event.target.value))} />
+        </label>
+        <div className="concept-lab-formula">
+          <Formula tex={`-|x|^{${power.toFixed(1)}}\\le |x|^{${power.toFixed(1)}}\\sin\\frac{${frequency.toFixed(1)}}{x}\\le |x|^{${power.toFixed(1)}}`} displayMode={true} />
+        </div>
+        <p className="concept-lab-note">拖小观察窗口时，注意上下边界怎样在 0 附近收口。</p>
+      </aside>
+
+      <section className="concept-lab-stage">
+        <svg className="concept-lab-chart" viewBox={`0 0 ${chart.width} ${chart.height}`} role="img" aria-label="夹逼定理实验曲线">
+          <line x1="38" y1={chart.axisX} x2="642" y2={chart.axisX} className="axis-line" />
+          <line x1={chart.axisY} y1="38" x2={chart.axisY} y2="342" className="axis-line" />
+          <path d={chart.upper} className="squeeze-bound upper" />
+          <path d={chart.lower} className="squeeze-bound lower" />
+          <path d={chart.middle} className="squeeze-middle" />
+          <text x="455" y="98" className="curve-label exact">上界</text>
+          <text x="455" y="302" className="curve-label approx">下界</text>
+        </svg>
+        <div className="concept-lab-readout">
+          <div><span>结论</span><strong>极限为 0</strong></div>
+          <div><span>逻辑</span><strong>两边收口</strong></div>
+          <div><span>中间</span><strong>只能跟随</strong></div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function EmlLabCard() {
+  return (
+    <div className="concept-lab-panel">
+      <aside className="concept-lab-controls">
+        <p className="atlas-kicker">EML tree lab</p>
+        <h2>现有的 EML 实验室继续保留</h2>
+        <p>这里不重复造一个简化版，而是把用户送到已有的表达式树实验室：输入函数，看 AST 如何被转换成 EML 树。</p>
+        <div className="concept-lab-formula">
+          <Formula tex={'\\text{eml}(x,y)=e^x-\\ln(y)'} displayMode={true} />
+        </div>
+        <Link className="atlas-inline-link" href="/lab">打开 EML 树实验室</Link>
+      </aside>
+      <section className="concept-lab-stage concept-eml-preview">
+        <svg viewBox="0 0 560 360" role="img" aria-label="EML 树预览">
+          <line x1="280" y1="60" x2="180" y2="160" />
+          <line x1="280" y1="60" x2="380" y2="160" />
+          <line x1="180" y1="160" x2="130" y2="280" />
+          <line x1="180" y1="160" x2="230" y2="280" />
+          <line x1="380" y1="160" x2="330" y2="280" />
+          <line x1="380" y1="160" x2="430" y2="280" />
+          {[
+            [280, 60, 'eml'], [180, 160, 'eml'], [380, 160, 'eml'],
+            [130, 280, 'x'], [230, 280, '1'], [330, 280, 'x'], [430, 280, '1'],
+          ].map(([x, y, text]) => (
+            <g key={`${x}-${y}`}>
+              <circle cx={x} cy={y} r={text === 'eml' ? 34 : 25} />
+              <text x={x} y={y + 7} textAnchor="middle">{text}</text>
+            </g>
+          ))}
+        </svg>
+      </section>
+    </div>
+  );
+}
+
+export default function ConceptLabs() {
+  const [activeLab, setActiveLab] = useState('taylor');
+  const active = labs.find((lab) => lab.id === activeLab);
+
+  return (
+    <main className="concept-labs-page">
+      <section className="concept-labs-hero">
+        <p className="atlas-kicker">interactive formula labs</p>
+        <h1>数学公式实验室</h1>
+        <p>这里专门给用户动手：拖动参数、观察误差、改变边界和迭代次数。理解不是只看讲解，而是亲手把公式推一遍。</p>
+      </section>
+
+      <nav className="concept-lab-tabs" aria-label="实验室切换">
+        {labs.map((lab) => (
+          <button
+            key={lab.id}
+            type="button"
+            className={activeLab === lab.id ? 'active' : ''}
+            onClick={() => setActiveLab(lab.id)}
+          >
+            <span>{lab.label}</span>
+            <strong>{lab.title}</strong>
+          </button>
+        ))}
+      </nav>
+
+      <section className="concept-lab-shell" aria-label={active?.title}>
+        {activeLab === 'taylor' && <TaylorLab />}
+        {activeLab === 'newton' && <NewtonLab />}
+        {activeLab === 'squeeze' && <SqueezeLab />}
+        {activeLab === 'eml' && <EmlLabCard />}
+      </section>
+    </main>
+  );
+}

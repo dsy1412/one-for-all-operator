@@ -136,10 +136,10 @@ function Hero() {
           这个网站现在不再只是 EML 的展示页，而是一座数学直觉展馆：
           每个展品都从问题出发，用图像解释逻辑，再用一个可操作例子把公式落地。
         </p>
-        <div className="atlas-v2-actions">
-          <a className="btn-primary" href="#gallery">进入展馆</a>
-          <a className="btn-ghost" href="#newton">先看 √51</a>
-        </div>
+      <div className="atlas-v2-actions">
+        <a className="btn-primary" href="#gallery">进入展馆</a>
+        <Link className="btn-ghost" href="/labs">打开实验室</Link>
+      </div>
       </div>
 
       <div className="atlas-v2-hero-stage" aria-label="数学可视化展馆首屏图">
@@ -422,7 +422,7 @@ function EmlExhibit() {
           <div><strong>替换输入</strong><span>x、常数、另一个 eml 都可以成为子节点。</span></div>
           <div><strong>树状组合</strong><span>复杂函数来自节点之间的嵌套关系。</span></div>
         </div>
-        <Link href="/lab" className="atlas-inline-link">进入 EML 表达式实验室</Link>
+        <Link href="/labs" className="atlas-inline-link">进入数学公式实验室</Link>
       </div>
     </section>
   );
