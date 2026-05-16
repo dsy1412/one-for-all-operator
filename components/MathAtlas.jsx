@@ -14,6 +14,14 @@ const exhibits = [
     formula: 'f(x)=\\sum_{k=0}^{n}\\frac{f^{(k)}(a)}{k!}(x-a)^k+R_n(x)',
   },
   {
+    id: 'derivative',
+    eyebrow: 'Instant rate',
+    title: '导数与切线',
+    question: '平均变化率怎样变成某一点的瞬时速度？',
+    idea: '让第二个点不断靠近第一个点，割线的斜率就会逼近切线斜率。',
+    formula: "f'(a)=\\lim_{h\\to 0}\\frac{f(a+h)-f(a)}{h}",
+  },
+  {
     id: 'newton',
     eyebrow: 'Shape correction',
     title: '平方根迭代',
@@ -257,6 +265,71 @@ function TaylorExhibit() {
   );
 }
 
+function DerivativeExhibit() {
+  const [gap, setGap] = useState(1.2);
+  const bounds = useMemo(() => ({ width: 620, height: 330, minX: -3.2, maxX: 3.2, minY: -1.8, maxY: 1.8 }), []);
+  const point = 0.8;
+  const second = point + gap;
+  const curve = useMemo(() => buildCurvePath((x) => Math.sin(x), bounds), [bounds]);
+  const y0 = Math.sin(point);
+  const y1 = Math.sin(second);
+  const secantSlope = (y1 - y0) / gap;
+  const tangentSlope = Math.cos(point);
+  const toX = (x) => 36 + ((x - bounds.minX) / (bounds.maxX - bounds.minX)) * (bounds.width - 72);
+  const toY = (y) => bounds.height - 36 - ((clamp(y, bounds.minY, bounds.maxY) - bounds.minY) / (bounds.maxY - bounds.minY)) * (bounds.height - 72);
+  const line = (slope) => {
+    const leftY = y0 + slope * (bounds.minX - point);
+    const rightY = y0 + slope * (bounds.maxX - point);
+    return `M ${toX(bounds.minX).toFixed(2)} ${toY(leftY).toFixed(2)} L ${toX(bounds.maxX).toFixed(2)} ${toY(rightY).toFixed(2)}`;
+  };
+
+  return (
+    <section id="derivative" className="atlas-v2-section atlas-v2-split reverse">
+      <div className="atlas-v2-workbench">
+        <div className="atlas-v2-workbench-head">
+          <div>
+            <p className="atlas-kicker">example / sin x</p>
+            <Formula tex={"f'(a)=\\lim_{h\\to 0}\\frac{f(a+h)-f(a)}{h}"} displayMode={true} />
+          </div>
+          <span>h = {gap.toFixed(2)}</span>
+        </div>
+        <div className="atlas-v2-stepper compact" role="group" aria-label="选择割线距离">
+          {[1.2, 0.8, 0.4, 0.2, 0.08].map((value) => (
+            <button key={value} type="button" className={Math.abs(gap - value) < 0.01 ? 'active' : ''} onClick={() => setGap(value)}>
+              h={value}
+            </button>
+          ))}
+        </div>
+        <svg className="atlas-v2-curve" viewBox="0 0 620 330" role="img" aria-label="导数割线切线示意">
+          <line x1="36" y1={curve.axisX} x2="584" y2={curve.axisX} className="axis-line" />
+          <line x1={curve.axisY} y1="28" x2={curve.axisY} y2="294" className="axis-line" />
+          <path d={curve.path} className="exact-path" />
+          <path d={line(tangentSlope)} className="derivative-tangent" />
+          <path d={line(secantSlope)} className="derivative-secant" />
+          <circle cx={toX(point)} cy={toY(y0)} r="6" className="anchor-dot" />
+          <circle cx={toX(second)} cy={toY(y1)} r="6" className="lab-probe approx" />
+          <text x="410" y="88" className="curve-label derivative">切线斜率 {tangentSlope.toFixed(3)}</text>
+          <text x="410" y="126" className="curve-label approx">割线斜率 {secantSlope.toFixed(3)}</text>
+        </svg>
+      </div>
+
+      <div>
+        <p className="atlas-kicker">exhibit 02 / derivative</p>
+        <h2>导数：从“两点变化”到“一点速度”</h2>
+        <p>
+          导数是泰勒公式的一阶信息。先取两个点得到割线斜率，再让第二个点贴近第一个点，
+          最后留下来的极限就是切线斜率。
+        </p>
+        <div className="atlas-v2-proofline">
+          <div><strong>平均变化</strong><span>两个点之间的高度差除以横向距离。</span></div>
+          <div><strong>缩短距离</strong><span>把 h 变小，割线越来越像切线。</span></div>
+          <div><strong>极限留下</strong><span>h 趋近 0 后，得到一点处的瞬时变化率。</span></div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function NewtonExhibit() {
   const [number, setNumber] = useState(51);
   const [rounds, setRounds] = useState(2);
@@ -458,6 +531,7 @@ export default function MathAtlas() {
       <Hero />
       <Gallery />
       <TaylorExhibit />
+      <DerivativeExhibit />
       <NewtonExhibit />
       <SqueezeExhibit />
       <EmlExhibit />

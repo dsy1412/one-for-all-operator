@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation';
 const navLinks = [
   { href: '/#gallery', label: '展馆' },
   { href: '/#taylor', label: '泰勒' },
+  { href: '/#derivative', label: '导数' },
   { href: '/#newton', label: '迭代' },
   { href: '/#squeeze', label: '夹逼' },
   { href: '/#eml', label: 'EML' },

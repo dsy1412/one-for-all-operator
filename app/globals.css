@@ -1261,7 +1261,7 @@ p {
 
 .atlas-v2-gallery {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
 }
 
@@ -1469,6 +1469,27 @@ p {
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.derivative-tangent,
+.derivative-secant {
+  fill: none;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.derivative-tangent {
+  stroke: var(--accent-green);
+}
+
+.derivative-secant {
+  stroke: var(--accent-cyan);
+  stroke-dasharray: 8 8;
+}
+
+.curve-label.derivative {
+  fill: var(--accent-green);
 }
 
 .atlas-v2-root-board {
@@ -1731,7 +1752,7 @@ p {
 
 .concept-lab-tabs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
   gap: 0.75rem;
   margin-bottom: 1rem;
 }

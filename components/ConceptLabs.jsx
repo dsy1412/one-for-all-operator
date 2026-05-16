@@ -6,6 +6,7 @@ import Formula from '@/components/Formula';
 
 const labs = [
   { id: 'taylor', label: '泰勒', title: '泰勒公式实验室' },
+  { id: 'derivative', label: '导数', title: '割线变切线实验室' },
   { id: 'newton', label: '平方根', title: '平方根迭代实验室' },
   { id: 'squeeze', label: '夹逼', title: '夹逼定理实验室' },
   { id: 'eml', label: 'EML', title: 'EML 树实验室' },
@@ -193,6 +194,95 @@ function TaylorLab() {
           <circle cx={probeX} cy={probeApproxY} r="5" className="lab-probe approx" />
           <text x="470" y="72" className="curve-label exact">真实函数</text>
           <text x="450" y="318" className="curve-label approx">泰勒多项式</text>
+        </svg>
+      </section>
+    </div>
+  );
+}
+
+function DerivativeLab() {
+  const [modelKey, setModelKey] = useState('sin');
+  const [point, setPoint] = useState(0.7);
+  const [gap, setGap] = useState(1);
+  const model = functionModels[modelKey];
+  const bounds = useMemo(() => ({
+    minX: model.minX,
+    maxX: model.maxX,
+    minY: model.minY,
+    maxY: model.maxY,
+  }), [model]);
+
+  const anchorX = clamp(point, bounds.minX + 0.15, bounds.maxX - 0.15);
+  const secondX = clamp(anchorX + gap, bounds.minX + 0.05, bounds.maxX - 0.05);
+  const effectiveGap = secondX - anchorX || 0.001;
+  const anchorY = model.exact(anchorX);
+  const secondY = model.exact(secondX);
+  const secantSlope = (secondY - anchorY) / effectiveGap;
+  const tangentSlope = model.derivative(1, anchorX);
+  const slopeError = Math.abs(secantSlope - tangentSlope);
+
+  const chart = useMemo(() => makePath((x) => model.exact(x), bounds), [model, bounds]);
+  const linePath = (slope) => {
+    const leftY = anchorY + slope * (bounds.minX - anchorX);
+    const rightY = anchorY + slope * (bounds.maxX - anchorX);
+    return `M ${chart.toX(bounds.minX).toFixed(2)} ${chart.toY(clamp(leftY, bounds.minY, bounds.maxY)).toFixed(2)} L ${chart.toX(bounds.maxX).toFixed(2)} ${chart.toY(clamp(rightY, bounds.minY, bounds.maxY)).toFixed(2)}`;
+  };
+
+  const anchorScreenX = chart.toX(anchorX);
+  const anchorScreenY = chart.toY(clamp(anchorY, bounds.minY, bounds.maxY));
+  const secondScreenX = chart.toX(secondX);
+  const secondScreenY = chart.toY(clamp(secondY, bounds.minY, bounds.maxY));
+
+  return (
+    <div className="concept-lab-panel">
+      <aside className="concept-lab-controls">
+        <p className="atlas-kicker">Derivative controls</p>
+        <h2>让割线慢慢变成切线</h2>
+        <p>导数不是一个神秘符号，它是两个点靠得越来越近时，平均变化率留下来的极限。</p>
+
+        <label>
+          函数
+          <select value={modelKey} onChange={(event) => setModelKey(event.target.value)}>
+            {Object.entries(functionModels).map(([key, item]) => (
+              <option key={key} value={key}>{item.name}</option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          观察点 a：{anchorX.toFixed(2)}
+          <input type="range" min={bounds.minX + 0.2} max={bounds.maxX - 0.2} step="0.05" value={point} onChange={(event) => setPoint(Number(event.target.value))} />
+        </label>
+
+        <label>
+          两点距离 h：{Math.abs(effectiveGap).toFixed(2)}
+          <input type="range" min="0.05" max="1.8" step="0.05" value={gap} onChange={(event) => setGap(Number(event.target.value))} />
+        </label>
+
+        <div className="concept-lab-formula">
+          <Formula tex={"f'(a)=\\lim_{h\\to 0}\\frac{f(a+h)-f(a)}{h}"} displayMode={true} />
+        </div>
+        <p className="concept-lab-note">把 h 往小拖，蓝色割线会贴近绿色切线；泰勒公式的一阶项就是这条切线。</p>
+      </aside>
+
+      <section className="concept-lab-stage">
+        <div className="concept-lab-readout">
+          <div><span>割线斜率</span><strong>{secantSlope.toFixed(6)}</strong></div>
+          <div><span>切线斜率</span><strong>{tangentSlope.toFixed(6)}</strong></div>
+          <div><span>斜率差</span><strong>{slopeError.toExponential(2)}</strong></div>
+        </div>
+        <svg className="concept-lab-chart" viewBox={`0 0 ${chart.width} ${chart.height}`} role="img" aria-label="导数实验曲线">
+          <line x1="38" y1={chart.axisX} x2="642" y2={chart.axisX} className="axis-line" />
+          <line x1={chart.axisY} y1="38" x2={chart.axisY} y2="342" className="axis-line" />
+          <path d={chart.path} className="exact-path" />
+          <path d={linePath(tangentSlope)} className="derivative-tangent" />
+          <path d={linePath(secantSlope)} className="derivative-secant" />
+          <line x1={anchorScreenX} y1={anchorScreenY} x2={secondScreenX} y2={secondScreenY} className="lab-error-line" />
+          <circle cx={anchorScreenX} cy={anchorScreenY} r="6" className="anchor-dot" />
+          <circle cx={secondScreenX} cy={secondScreenY} r="6" className="lab-probe approx" />
+          <text x="430" y="78" className="curve-label exact">函数曲线</text>
+          <text x="410" y="118" className="curve-label derivative">切线</text>
+          <text x="410" y="154" className="curve-label approx">割线</text>
         </svg>
       </section>
     </div>
@@ -397,6 +487,7 @@ export default function ConceptLabs() {
 
       <section className="concept-lab-shell" aria-label={active?.title}>
         {activeLab === 'taylor' && <TaylorLab />}
+        {activeLab === 'derivative' && <DerivativeLab />}
         {activeLab === 'newton' && <NewtonLab />}
         {activeLab === 'squeeze' && <SqueezeLab />}
         {activeLab === 'eml' && <EmlLabCard />}
