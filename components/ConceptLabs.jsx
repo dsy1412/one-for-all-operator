@@ -52,6 +52,71 @@ const functionModels = {
     maxY: 2,
     note: 'cos 在 0 附近的偶函数结构很明显：0、2、4、6 阶会越来越像原曲线。',
   },
+  log1p: {
+    name: 'ln(1+x)',
+    tex: '\\ln(1+x)',
+    exact: (x) => Math.log1p(x),
+    derivative: (order, a) => {
+      if (order === 0) return Math.log1p(a);
+      const sign = order % 2 === 1 ? 1 : -1;
+      return (sign * factorial(order - 1)) / ((1 + a) ** order);
+    },
+    minX: -0.85,
+    maxX: 2.5,
+    minY: -2.4,
+    maxY: 1.8,
+    centerMin: -0.6,
+    centerMax: 1.4,
+    defaultProbe: 0.8,
+    note: '对数函数很适合观察“有效范围”：在 x=-1 附近有边界，展开中心越靠近边界，低阶近似越容易失真。',
+  },
+  sqrt1p: {
+    name: 'sqrt(1+x)',
+    tex: '\\sqrt{1+x}',
+    exact: (x) => Math.sqrt(1 + x),
+    derivative: (order, a) => {
+      if (order === 0) return Math.sqrt(1 + a);
+      return fallingCoefficient(0.5, order) * ((1 + a) ** (0.5 - order));
+    },
+    minX: -0.88,
+    maxX: 2.8,
+    minY: -0.2,
+    maxY: 2.3,
+    centerMin: -0.6,
+    centerMax: 1.5,
+    defaultProbe: 1,
+    note: '根号函数的高阶项会不断修正弯曲程度；把测试点拖到左边，可以看到它对定义域边界非常敏感。',
+  },
+  cosh: {
+    name: 'cosh x',
+    tex: '\\cosh x',
+    exact: (x) => Math.cosh(x),
+    derivative: (order, a) => (order % 2 === 0 ? Math.cosh(a) : Math.sinh(a)),
+    minX: -2.4,
+    maxX: 2.4,
+    minY: -0.5,
+    maxY: 5.8,
+    defaultProbe: 1.2,
+    note: 'cosh 是偶函数，围绕 0 展开时只留下偶数次项；它能帮你把“对称性”和泰勒项联系起来。',
+  },
+  cubic: {
+    name: 'x^3 - 2x + 1',
+    tex: 'x^3-2x+1',
+    exact: (x) => (x ** 3) - (2 * x) + 1,
+    derivative: (order, a) => {
+      if (order === 0) return (a ** 3) - (2 * a) + 1;
+      if (order === 1) return (3 * (a ** 2)) - 2;
+      if (order === 2) return 6 * a;
+      if (order === 3) return 6;
+      return 0;
+    },
+    minX: -2.2,
+    maxX: 2.2,
+    minY: -5.8,
+    maxY: 8,
+    defaultProbe: 1.4,
+    note: '多项式是一个反例式的好教材：阶数达到 3 以后，泰勒多项式不再只是近似，而是完全等于原函数。',
+  },
   rational: {
     name: '1/(1-x)',
     tex: '\\frac{1}{1-x}',
@@ -68,6 +133,12 @@ const functionModels = {
 function factorial(n) {
   let result = 1;
   for (let i = 2; i <= n; i += 1) result *= i;
+  return result;
+}
+
+function fallingCoefficient(base, order) {
+  let result = 1;
+  for (let i = 0; i < order; i += 1) result *= base - i;
   return result;
 }
 
@@ -103,8 +174,17 @@ function makePath(fn, bounds) {
 function buildTaylorFormula(model, center, degree) {
   if (Math.abs(center) < 0.001) {
     if (model.name === 'e^x') return `e^x\\approx \\sum_{k=0}^{${degree}}\\frac{x^k}{k!}`;
-    if (model.name === 'sin x') return `\\sin x\\approx \\sum_{k=0}^{${Math.floor((degree - 1) / 2)}}(-1)^k\\frac{x^{2k+1}}{(2k+1)!}`;
+    if (model.name === 'sin x') {
+      if (degree === 0) return '\\sin x\\approx 0';
+      return `\\sin x\\approx \\sum_{k=0}^{${Math.floor((degree - 1) / 2)}}(-1)^k\\frac{x^{2k+1}}{(2k+1)!}`;
+    }
     if (model.name === 'cos x') return `\\cos x\\approx \\sum_{k=0}^{${Math.floor(degree / 2)}}(-1)^k\\frac{x^{2k}}{(2k)!}`;
+    if (model.name === 'ln(1+x)') {
+      if (degree === 0) return '\\ln(1+x)\\approx 0';
+      return `\\ln(1+x)\\approx \\sum_{k=1}^{${degree}}(-1)^{k+1}\\frac{x^k}{k}`;
+    }
+    if (model.name === 'sqrt(1+x)') return `\\sqrt{1+x}\\approx \\sum_{k=0}^{${degree}}\\binom{1/2}{k}x^k`;
+    if (model.name === 'cosh x') return `\\cosh x\\approx \\sum_{k=0}^{${Math.floor(degree / 2)}}\\frac{x^{2k}}{(2k)!}`;
   }
 
   return `${model.tex}\\approx \\sum_{k=0}^{${degree}}\\frac{f^{(k)}(${center.toFixed(1)})}{k!}(x-${center.toFixed(1)})^k`;
@@ -117,6 +197,16 @@ function TaylorLab() {
   const [probe, setProbe] = useState(1);
   const model = functionModels[modelKey];
 
+  const centerRange = useMemo(() => ({
+    min: model.centerMin ?? Math.max(model.minX + 0.2, -1.5),
+    max: model.centerMax ?? Math.min(model.maxX - 0.2, 1.5),
+  }), [model]);
+
+  const probeRange = useMemo(() => ({
+    min: model.probeMin ?? model.minX,
+    max: model.probeMax ?? model.maxX,
+  }), [model]);
+
   const bounds = useMemo(() => ({
     minX: model.minX,
     maxX: model.maxX,
@@ -124,20 +214,26 @@ function TaylorLab() {
     maxY: model.maxY,
   }), [model]);
 
-  const exact = model.exact(probe);
-  const approx = taylorValue(model, probe, center, degree);
+  const activeCenter = clamp(center, centerRange.min, centerRange.max);
+  const activeProbe = clamp(probe, probeRange.min, probeRange.max);
+  const exact = model.exact(activeProbe);
+  const approx = taylorValue(model, activeProbe, activeCenter, degree);
   const error = Math.abs(exact - approx);
-  const chart = useMemo(() => {
-    const exactPath = makePath((x) => model.exact(x), bounds);
-    const approxPath = makePath((x) => taylorValue(model, x, center, degree), bounds);
-    return { ...exactPath, exactPath: exactPath.path, approxPath: approxPath.path };
-  }, [model, bounds, center, degree]);
+  const exactPath = makePath((x) => model.exact(x), bounds);
+  const approxPath = makePath((x) => taylorValue(model, x, activeCenter, degree), bounds);
+  const chart = { ...exactPath, exactPath: exactPath.path, approxPath: approxPath.path };
 
-  const centerX = chart.toX(center);
-  const centerY = chart.toY(clamp(model.exact(center), bounds.minY, bounds.maxY));
-  const probeX = chart.toX(probe);
+  const centerX = chart.toX(activeCenter);
+  const centerY = chart.toY(clamp(model.exact(activeCenter), bounds.minY, bounds.maxY));
+  const probeX = chart.toX(activeProbe);
   const probeExactY = chart.toY(clamp(exact, bounds.minY, bounds.maxY));
   const probeApproxY = chart.toY(clamp(approx, bounds.minY, bounds.maxY));
+  const handleModelChange = (event) => {
+    const nextModel = functionModels[event.target.value];
+    setModelKey(event.target.value);
+    setCenter(nextModel.defaultCenter ?? 0);
+    setProbe(nextModel.defaultProbe ?? 1);
+  };
 
   return (
     <div className="concept-lab-panel">
@@ -148,7 +244,7 @@ function TaylorLab() {
 
         <label>
           函数
-          <select value={modelKey} onChange={(event) => setModelKey(event.target.value)}>
+          <select value={modelKey} onChange={handleModelChange}>
             {Object.entries(functionModels).map(([key, item]) => (
               <option key={key} value={key}>{item.name}</option>
             ))}
@@ -161,17 +257,17 @@ function TaylorLab() {
         </label>
 
         <label>
-          展开中心 a：{center.toFixed(1)}
-          <input type="range" min="-1.5" max="1.5" step="0.1" value={center} onChange={(event) => setCenter(Number(event.target.value))} />
+          展开中心 a：{activeCenter.toFixed(1)}
+          <input type="range" min={centerRange.min} max={centerRange.max} step="0.1" value={activeCenter} onChange={(event) => setCenter(Number(event.target.value))} />
         </label>
 
         <label>
-          测试点 x：{probe.toFixed(1)}
-          <input type="range" min={bounds.minX} max={bounds.maxX} step="0.1" value={probe} onChange={(event) => setProbe(Number(event.target.value))} />
+          测试点 x：{activeProbe.toFixed(1)}
+          <input type="range" min={probeRange.min} max={probeRange.max} step="0.1" value={activeProbe} onChange={(event) => setProbe(Number(event.target.value))} />
         </label>
 
         <div className="concept-lab-formula">
-          <Formula tex={buildTaylorFormula(model, center, degree)} displayMode={true} />
+          <Formula tex={buildTaylorFormula(model, activeCenter, degree)} displayMode={true} />
         </div>
         <p className="concept-lab-note">{model.note}</p>
       </aside>
